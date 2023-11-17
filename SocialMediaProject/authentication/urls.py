@@ -23,4 +23,5 @@ urlpatterns = [
     path("changepassword/",ChangePasswordView.as_view()),
     path("uploadpost/",UploadPost.as_view()),
     path("addcomment/",AddComment.as_view()),
+    path("viewpost/",views.PostView.as_view()),
 ]
