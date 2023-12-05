@@ -27,6 +27,8 @@ from rest_framework import status
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from rest_framework.exceptions import PermissionDenied
+import json
+import logging
 
 # from .seriallizer import *
 # from .emails import *
@@ -35,6 +37,9 @@ from rest_framework.exceptions import PermissionDenied
 # from re import S
 # from tkinter import E
 
+
+logger = logging.getLogger(__name__)
+
 engine = create_engine('postgresql+psycopg2://postgres:1234@localhost:5432/SMP', echo=True)
 
 conn = engine.connect()
@@ -42,11 +47,16 @@ conn = engine.connect()
 # Custom Login Required
 def custom_login_required(view_func):
     def wrapper(request, *args, **kwargs):
-        # Check if the request contains email and password
-        data = pd.read_sql("SELECT * from  authentication_user",conn)
 
-        email = request.request.data.get('email')
-        password = request.request.data.get('password')
+        logger.info("Execution Start")
+        data = pd.read_sql("SELECT * from  authentication_user",conn)
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        # email = request.POST['email']
+        # password = request.POST['password']
+
+        # print("\n\n",email," : ",password)
     
         if email and password:
             users = data.loc[:,['email','password']]
@@ -55,4 +65,6 @@ def custom_login_required(view_func):
                 if pass1.iloc[0] == password:
                     return view_func(request, *args, **kwargs)
         raise PermissionDenied(detail='Authentication required')
+    logger.info("Execution End")
     return wrapper
+

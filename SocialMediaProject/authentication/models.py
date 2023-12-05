@@ -16,6 +16,8 @@ class User(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     is_validate = models.BooleanField(default=False)
     last_login = models.DateTimeField(auto_now=True)
+    jwt_token = models.CharField(max_length=200,default="")
+    is_verified = models.BooleanField(default=False)
 
     def get_email_field_name(self):
         return 'email'

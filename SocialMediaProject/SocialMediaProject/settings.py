@@ -12,6 +12,18 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+# import datetime
+# from logging.handlers import TimedRotatingFileHandler
+# from utilities.auth_utilities import CustomRotatingFileHandler
+
+import os
+import logging
+from logging.handlers import TimedRotatingFileHandler
+from datetime import datetime
+import shutil
+# from utilities.auth_utilities import CustomRotatingFileHandler
+from authentication.custom_log_handlers import CustomTimedRotatingFileHandler
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -32,6 +44,8 @@ ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 # Application definition
 
 INSTALLED_APPS = [
+    'django_crontab',
+    'django_cron',
     "authentication",
     "rest_framework",
     "django.contrib.admin",
@@ -50,6 +64,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "authentication.middleware.custom_middleware.CustomJwtAuthenticationMiddleware",
 ]
 
 ROOT_URLCONF = "SocialMediaProject.urls"
@@ -133,9 +148,71 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # MY added
 
+# X-Frame-Options: DENY
+X_Frame_Options = 'DENY'
+
+
+# Define a dynamic log file path using the BASE_DIR
+LOGGING_DIR = os.path.join(BASE_DIR, 'logs')
+
+# Ensure the logs directory exists
+if not os.path.exists(LOGGING_DIR):
+    os.makedirs(LOGGING_DIR)
+
+
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {lineno} {funcName} {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
+    },
+
+    'handlers': {
+        'timed_rotating_file': {
+            'level': 'INFO',
+            'class': 'authentication.custom_log_handlers.CustomTimedRotatingFileHandler',
+            'filename': os.path.join(LOGGING_DIR, f"SMP_{datetime.now().strftime('%Y%m%d%H%M%S')}.log"),
+            'when': 'M',
+            'interval': 30,
+            'backupCount': 0,  # Do not keep backup files
+            'formatter': 'verbose',
+            'delay': True,
+        },
+        'console': {
+                'class': 'logging.StreamHandler',
+                'formatter': 'verbose',
+            },
+    },
+    'loggers': {
+        'timed_rotating_file': {
+            'handlers': ['timed_rotating_file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+
+    
+    'root': {
+        'handlers': ['timed_rotating_file','console'],
+        'level': 'DEBUG',
+    },
+}
+
+
 # For send link in the email for forgot password
 FRONTEND_URL = 'http://127.0.0.1:8000/user/passwordresetconfirm'
 
+# For send link in the email for verify registration
+REGISTER_URL = 'http://127.0.0.1:8000/user/verifyuser'
 
 
 # For Email (Email host password get from google's -> APP password)
@@ -149,3 +226,4 @@ EMAIL_HOST_PASSWORD = 'evdsvvnsvqljjrlx'
 # For save image to this path
 MEDIA_ROOT =  os.path.join(BASE_DIR, 'upload')
 MEDIA_URL = '/upload/'
+
