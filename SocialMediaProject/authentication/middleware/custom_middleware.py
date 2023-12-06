@@ -25,12 +25,12 @@ class CustomJwtAuthenticationMiddleware:
         logger.debug(request.path)
         
         exempt_middleware_path_list = ['','/','/admin/','/user/','/user/register/','/user/logout/','/user/login/','/user/forgotpassword/',
-                                       '/user/changepassword/']
+                                       '/user/changepassword/','/user/viewuser/']
         start_with_path = ['/admin/','/user/verifyuser/','/user/passwordresetconfirm/reset-password/']
         print(request.path)
         # print(list(request.path.startswith(path) for path in start_with_path))
         
-        if request.path in exempt_middleware_path_list or list(request.path.startswith(path) for path in start_with_path)[0]:
+        if request.path in exempt_middleware_path_list or True in list(request.path.startswith(path) for path in start_with_path):
             response = self.get_response(request)
         else:
             auth_header = request.headers.get('Authorization')

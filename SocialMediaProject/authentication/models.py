@@ -28,6 +28,14 @@ class User(models.Model):
     def set_password(self,password):
         self.password = password
 
+class Profile(models.Model):
+    user = models.OneToOneField(User,  on_delete=models.CASCADE)
+    profile_pic = models.ImageField(upload_to ='profile_pic/')
+
+    def __str__(self):
+        return f'{self.user.name} Profile'
+
+
 class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=100)

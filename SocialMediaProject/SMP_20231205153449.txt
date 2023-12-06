@@ -1,6 +1,0 @@
-INFO 2023-12-05 15:33:05,252 custom_middleware 24 __call__ Execution Start
-DEBUG 2023-12-05 15:33:05,281 custom_middleware 25 __call__ /user/
-INFO 2023-12-05 15:33:05,285 views 50 get View User :Execution Start
-INFO 2023-12-05 15:33:05,289 views 51 get View User :Execution Start
-INFO 2023-12-05 15:33:05,290 views 54 get View ALL User :Execution End
-INFO 2023-12-05 15:33:05,376 custom_middleware 51 __call__ Execution End

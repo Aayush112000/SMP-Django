@@ -7,5 +7,5 @@ class AuthenticationConfig(AppConfig):
     name = "authentication"
 
     def ready(self):
-        pass
+        import authentication.signals
     

@@ -65,6 +65,13 @@ class UserApiView(APIView):
         user = User.objects.filter(name=request.data['name']).values()
         return Response({"Message":"New User Added", "User":user})
 
+# Create your views here.
+class UserInfo(APIView):
+    def get(self,request):
+        user = User.objects.get(name = request.data.get("name"))
+
+        return Response({"Message":"User data ", "User name":user.name,"User email":user.email})
+
 
 #user sign up
 class UserSignUp(APIView):
@@ -120,7 +127,7 @@ class UserSignUp(APIView):
 
         # Send reset email
         send_mail(
-            'Password Reset',
+            'Verify Register',
             f'Click the link below to Register:\n\n{register_link}',
             settings.EMAIL_HOST_USER,
             [new_user.email],

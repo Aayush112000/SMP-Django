@@ -27,4 +27,5 @@ urlpatterns = [
     path("addcomment/",views.AddComment.as_view()),
     path("viewpost/",views.PostView.as_view()),
     path("verifyuser/<str:uidb64>/<str:token>/",views.VerifyRegister.as_view()),
+    path("viewuser/",views.UserInfo.as_view()),
 ]
