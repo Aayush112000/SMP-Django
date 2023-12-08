@@ -25,7 +25,7 @@ class CustomJwtAuthenticationMiddleware:
         logger.debug(request.path)
         
         exempt_middleware_path_list = ['','/','/admin/','/user/','/user/register/','/user/logout/','/user/login/','/user/forgotpassword/',
-                                       '/user/changepassword/','/user/viewuser/']
+                                       '/user/changepassword/','/user/viewuser/','/user/make_payment/','/user/create-payment-intent/']
         start_with_path = ['/admin/','/user/verifyuser/','/user/passwordresetconfirm/reset-password/']
         print(request.path)
         # print(list(request.path.startswith(path) for path in start_with_path))

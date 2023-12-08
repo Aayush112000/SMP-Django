@@ -182,7 +182,7 @@ LOGGING = {
             'class': 'authentication.custom_log_handlers.CustomTimedRotatingFileHandler',
             'filename': os.path.join(LOGGING_DIR, f"SMP_{datetime.now().strftime('%Y%m%d%H%M%S')}.log"),
             'when': 'M',
-            'interval': 30,
+            'interval': 1,
             'backupCount': 0,  # Do not keep backup files
             'formatter': 'verbose',
             'delay': True,
@@ -227,3 +227,6 @@ EMAIL_HOST_PASSWORD = 'evdsvvnsvqljjrlx'
 MEDIA_ROOT =  os.path.join(BASE_DIR, 'upload')
 MEDIA_URL = '/upload/'
 
+# For integrate stripe payment gateway
+STRIPE_SECRET_KEY = 'sk_test_51OKa3ZSGUsQNdN776A36Nkvlr8vd8H8lCTBiKTbgm7ZQs2honUI3vayqcwzu6PA1cOURimjwPuSx4lG20QPiYeu800ntgojtFd'
+STRIPE_PUBLISHABLE_KEY = 'pk_test_51OKa3ZSGUsQNdN77uHVIfQ1Cihd6K2bXxv1wbUXKGpBaI9EiIOz1XUXC4jTBziHCKSLqQY9RiaIqUyjgH7oZ42iX00Slqjywdb'

@@ -40,6 +40,17 @@ import json
 import jwt
 import logging
 
+import stripe
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+stripe.PaymentIntent.create(
+  amount=1099,
+  currency="usd",
+  payment_method_types=["card"],
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -415,3 +426,162 @@ class PostView(APIView):
         allPosts = Post.objects.all().values().order_by('-id')
         logger.info("Post View : View all List of Posts")
         return Response({"Message":"List of Posts", "Post List":allPosts})
+
+
+# Stripe Payment API
+class PaymentAPI(APIView):
+    def post(self, request):
+        response = {}
+        try:
+            data_dict = request.data
+            print("\n\n\n\n",data_dict)
+            stripe.api_key = 'your-key-goes-here'
+            response = self.stripe_card_payment(data_dict=data_dict)
+        except:
+            response = {'errors': "serializer.errors", 'status':
+                "status.HTTP_400_BAD_REQUEST"
+                }
+        
+        return Response(response)
+    
+    def stripe_card_payment(self, data_dict):
+        try:
+            card_details = (
+                type=="card",
+                card=={
+                    "number": data_dict['card_number'],
+                    "exp_month": data_dict['expiry_month'],
+                    "exp_year": data_dict['expiry_year'],
+                    "cvc": data_dict['cvc'],
+                },
+            )
+            #  you can also get the amount from databse by creating a model
+            payment_intent = stripe.PaymentIntent.create(
+                amount=10000, 
+                currency='inr',
+            )
+            payment_intent_modified = stripe.PaymentIntent.modify(
+                payment_intent['id'],
+                payment_method=card_details['id'],
+            )
+            try:
+                payment_confirm = stripe.PaymentIntent.confirm(
+                    payment_intent['id']
+                )
+                payment_intent_modified = stripe.PaymentIntent.retrieve(payment_intent['id'])
+            except:
+                payment_intent_modified = stripe.PaymentIntent.retrieve(payment_intent['id'])
+                payment_confirm = {
+                    "stripe_payment_error": "Failed",
+                    "code": payment_intent_modified['last_payment_error']['code'],
+                    "message": payment_intent_modified['last_payment_error']['message'],
+                    'status': "Failed"
+                }
+            if payment_intent_modified and payment_intent_modified['status'] == 'succeeded':
+                response = {
+                    'message': "Card Payment Success",
+                    'status': status.HTTP_200_OK,
+                    "card_details": card_details,
+                    "payment_intent": payment_intent_modified,
+                    "payment_confirm": payment_confirm
+                }
+            else:
+                response = {
+                    'message': "Card Payment Failed",
+                    'status': status.HTTP_400_BAD_REQUEST,
+                    "card_details": card_details,
+                    "payment_intent": payment_intent_modified,
+                    "payment_confirm": payment_confirm
+                }
+        except:
+            response = {
+                'error': "Your card number is incorrect",
+                'status': status.HTTP_400_BAD_REQUEST,
+                "payment_intent": {"id": "Null"},
+                "payment_confirm": {'status': "Failed"}
+            }
+        return response
+
+class PaymentIntentView(APIView):
+    def post(self, request, *args, **kwargs):
+        amount = request.data.get('amount')  # The amount in cents
+        currency = request.data.get('currency', 'usd')
+
+        # Use the correct API version in the Stripe base URL
+        stripe.api_version = '2023-10-16'  # Replace with the desired API version
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+
+        # Create a customer (replace with your customer creation logic)
+        customer = stripe.Customer.create(email=request.data.get('email'))
+
+
+        intent = stripe.PaymentIntent.create(
+            amount=amount,
+            currency=currency,
+        )
+
+        # Assuming you have already created an ephemeral key and customer
+        ephemeral_key = stripe.EphemeralKey.create(
+            customer=customer.id,
+            stripe_version=stripe.api_version
+        )
+
+        # Save the PaymentIntent details in your database
+        PaymentIntent.objects.create(
+            client_secret=intent.client_secret,
+            amount=amount,
+            currency=currency,
+        )
+
+        response_data = {
+            "paymentIntent": intent.client_secret,
+            "ephemeralKey": ephemeral_key.secret,
+            "customer": customer.id,
+            "publishableKey": settings.STRIPE_PUBLISHABLE_KEY,  # Replace with your actual publishable key
+        }
+
+        # return Response({'client_secret': intent.client_secret}, status=status.HTTP_200_OK)
+        return Response(response_data, status=status.HTTP_200_OK)
+
+class ConfirmPaymentView(APIView):
+    def post(self, request, *args, **kwargs):
+        payment_intent_id = request.data.get('payment_intent_id')
+
+        intent = stripe.PaymentIntent.confirm(
+            payment_intent_id,
+        )
+
+        # Handle the payment confirmation, update your database, etc.
+        # ...
+
+        return Response({'message': 'Payment confirmed successfully.'}, status=status.HTTP_200_OK)
+
+@csrf_exempt
+def stripe_webhook(request):
+    payload = request.body
+    sig_header = request.headers.get('Stripe-Signature')
+
+    # Replace 'your-endpoint-secret' with your actual endpoint secret from the Stripe Dashboard
+    endpoint_secret = settings.STRIPE_SECRET_KEY
+
+    event = None
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, endpoint_secret
+        )
+    except ValueError as e:
+        # Invalid payload
+        return HttpResponse(status=400)
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        return HttpResponse(status=400)
+
+    # Handle the event
+    if event['type'] == 'payment_intent.succeeded':
+        # Payment succeeded
+        payment_intent = event['data']['object']  # contains a stripe.PaymentIntent
+        # Handle the success event, update your database, etc.
+        # ...
+
+    return HttpResponse(status=200)

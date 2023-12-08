@@ -28,4 +28,8 @@ urlpatterns = [
     path("viewpost/",views.PostView.as_view()),
     path("verifyuser/<str:uidb64>/<str:token>/",views.VerifyRegister.as_view()),
     path("viewuser/",views.UserInfo.as_view()),
+    path('make_payment/', views.PaymentAPI.as_view(), name='make_payment'),
+    path('create-payment-intent/', views.PaymentIntentView.as_view(), name='create-payment-intent'),
+    path('confirm-payment/', views.ConfirmPaymentView.as_view(), name='confirm-payment'),
+    path('stripe-webhook/', views.stripe_webhook, name='stripe-webhook'),
 ]

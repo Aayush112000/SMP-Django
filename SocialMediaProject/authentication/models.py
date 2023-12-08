@@ -62,3 +62,9 @@ class Comment(models.Model):
 
     def comment_likes_count(self):
         return self.comments_like.count()
+
+
+class PaymentIntent(models.Model):
+    client_secret = models.CharField(max_length=255)
+    amount = models.PositiveIntegerField()
+    currency = models.CharField(max_length=3)
