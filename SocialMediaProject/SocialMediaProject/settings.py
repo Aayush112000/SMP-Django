@@ -36,14 +36,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-x(r)0@9^91)ref2b4m*qtdhi)2qrw7&r01nb575pgk6$_*2%-g"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost','*']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    "push_notifications",
     'django_crontab',
     'django_cron',
     "authentication",
@@ -230,3 +231,9 @@ MEDIA_URL = '/upload/'
 # For integrate stripe payment gateway
 STRIPE_SECRET_KEY = 'sk_test_51OKa3ZSGUsQNdN776A36Nkvlr8vd8H8lCTBiKTbgm7ZQs2honUI3vayqcwzu6PA1cOURimjwPuSx4lG20QPiYeu800ntgojtFd'
 STRIPE_PUBLISHABLE_KEY = 'pk_test_51OKa3ZSGUsQNdN77uHVIfQ1Cihd6K2bXxv1wbUXKGpBaI9EiIOz1XUXC4jTBziHCKSLqQY9RiaIqUyjgH7oZ42iX00Slqjywdb'
+
+PUSH_NOTIFICATIONS_SETTINGS = {
+    "FCM_API_KEY": "AAAAsVgymgY:APA91bHM66heADyDiJjyBCScRRYLwenszTizxVf0eZ9g9nIkALJilUZiKC9Gn4k2-vuEc8wZfRH1bzdGwpj0rbB8WUbxId02CHev9VDbHI-RO_y4D6Bqv9Nm5iRwty_UsNB-Bpb9MgvS",
+    "GCM_API_KEY": "AIzaSyCrLPGdLezqw_LzPhyyLqBxMCUx0r4trVc",
+    "APNS_CERTIFICATE": "/path/to/your/certificate.pem",
+}
